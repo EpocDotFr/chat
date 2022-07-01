@@ -1,38 +1,51 @@
 import tkinter.font as tk_font
+from tkinter import ttk
 import tkinter as tk
 
 
 class Application(tk.Tk):
-    def __init__(self, *args, **kvargs):
+    def __init__(self, nickname, url, *args, **kvargs):
         super(Application, self).__init__(*args, **kvargs)
 
-        self.title('Chat')
+        self.nickname = nickname
+        self.url = url
+
+        self.title('Chat - {}@{}'.format(self.nickname, self.url))
         self.geometry('800x600')
 
         self.build_gui()
 
     def build_gui(self):
-        self.text_widget = tk.Text(self)
+        # Messages container
+        self.messages = tk.Text(self)
 
         nickname_font = tk_font.Font(font='TkDefaultFont')
         nickname_font.configure(weight='bold')
 
-        system_font = tk_font.Font(font='TkDefaultFont')
-        system_font.configure(slant='italic')
+        system_message_public_font = tk_font.Font(font='TkDefaultFont')
+        system_message_public_font.configure(slant='italic')
 
-        self.text_widget.tag_configure('nickname', font=nickname_font)
-        self.text_widget.tag_configure('system', font=system_font)
+        system_message_private_font = tk_font.Font(font='TkDefaultFont')
+        system_message_private_font.configure(slant='italic')
 
-        self.text_widget.insert(tk.END, '<Epoc>', ('nickname',))
-        self.text_widget.insert(tk.END, ' Hey')
+        self.messages.tag_configure('nickname', font=nickname_font)
+        self.messages.tag_configure('system-public', foreground='dark green', font=system_message_public_font)
+        self.messages.tag_configure('system-private', foreground='grey', font=system_message_private_font)
 
-        self.text_widget.insert(tk.END, '\nMastock a rejoint le chat', ('system',))
+        self.messages.insert(tk.END, 'Connexion à {}...'.format(self.url), ('system-private',))
+        self.messages.insert(tk.END, '\nConnecté', ('system-private',))
 
-        self.text_widget.insert(tk.END, '\n<Mastock>', ('nickname',))
-        self.text_widget.insert(tk.END, ' yo')
+        self.messages.insert(tk.END, '\nEpoc a rejoint le chat', ('system-public',))
 
-        self.text_widget.insert(tk.END, '\nMastock a quitté le chat', ('system',))
+        self.messages.insert(tk.END, '\n<Epoc>', ('nickname',))
+        self.messages.insert(tk.END, ' Yo')
 
-        self.text_widget.configure(state=tk.DISABLED)
+        self.messages.configure(state=tk.DISABLED)
 
-        self.text_widget.pack(fill=tk.BOTH, expand=True)
+        self.messages.pack(fill=tk.BOTH, expand=True)
+
+        # New message input
+
+        self.message_input = ttk.Entry(self)
+
+        self.message_input.pack(fill=tk.BOTH, expand=True)
