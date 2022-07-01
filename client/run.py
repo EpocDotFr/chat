@@ -1,3 +1,4 @@
+from client import Application
 import argparse
 
 
@@ -9,6 +10,8 @@ def run():
     args = arg_parser.parse_args()
 
     print('Initializing client...')
+
+    Application().mainloop()
 
 if __name__ == '__main__':
     run()
