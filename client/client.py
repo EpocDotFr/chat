@@ -1,6 +1,7 @@
 import tkinter.font as tk_font
 from tkinter import ttk
 import tkinter as tk
+import socketio
 
 
 class Application(tk.Tk):
@@ -14,6 +15,7 @@ class Application(tk.Tk):
         self.geometry('800x600')
 
         self.build_gui()
+        self.init_socketio()
 
     def build_gui(self):
         # Messages container
@@ -49,3 +51,20 @@ class Application(tk.Tk):
         self.message_input = ttk.Entry(self)
 
         self.message_input.pack(fill=tk.BOTH, expand=True)
+
+    def init_socketio(self):
+        self.sio = socketio.Client(logger=True)
+
+        self.sio.connect(self.url)
+
+        @self.sio.event
+        def connect():
+            print('Connected')
+
+        @self.sio.event
+        def connect_error(data):
+            print('Connection failed')
+
+        @self.sio.event
+        def disconnect():
+            print('Disconnected')

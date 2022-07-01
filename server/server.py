@@ -3,10 +3,10 @@ import socketio
 
 class SocketIoNamespace(socketio.Namespace):
     def on_connect(self, sid, environ):
-        pass
+        print('Connected')
 
     def on_disconnect(self, sid):
-        pass
+        print('Disconnected')
 
 
 class SocketIoServer(socketio.Server):
