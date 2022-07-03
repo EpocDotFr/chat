@@ -55,7 +55,7 @@ class Application(tk.Tk):
     def init_socketio(self):
         self.sio = socketio.Client(logger=True)
 
-        self.sio.connect(self.url)
+        self.sio.connect(self.url, transports=('websocket',))
 
         @self.sio.event
         def connect():
