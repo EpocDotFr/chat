@@ -73,15 +73,12 @@ class Application(tk.Tk):
         self.nickname_font = tk_font.Font(font='TkDefaultFont')
         self.nickname_font.configure(weight='bold')
 
-        self.system_message_public_font = tk_font.Font(font='TkDefaultFont')
-        self.system_message_public_font.configure(slant='italic')
-
-        self.system_message_private_font = tk_font.Font(font='TkDefaultFont')
-        self.system_message_private_font.configure(slant='italic')
+        self.system_message_font = tk_font.Font(font='TkDefaultFont')
+        self.system_message_font.configure(slant='italic')
 
         self.messages.tag_configure('nickname', font=self.nickname_font)
-        self.messages.tag_configure('system-public', foreground='dark green', font=self.system_message_public_font)
-        self.messages.tag_configure('system-private', foreground='grey', font=self.system_message_private_font)
+        self.messages.tag_configure('system-public', foreground='dark green', font=self.system_message_font)
+        self.messages.tag_configure('system-private', foreground='grey', font=self.system_message_font)
 
         self.messages.pack(fill=tk.BOTH, expand=True)
 
