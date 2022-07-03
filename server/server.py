@@ -1,7 +1,7 @@
 import socketio
 
 
-class SocketIoNamespace(socketio.Namespace):
+class SocketIoServerNamespace(socketio.Namespace):
     def on_connect(self, sid, environ):
         print('Connected')
 
@@ -13,6 +13,6 @@ class SocketIoServer(socketio.Server):
     def __init__(self, *args, **kvargs):
         super(SocketIoServer, self).__init__(*args, **kvargs)
 
-        self.register_namespace(SocketIoNamespace('/'))
+        self.register_namespace(SocketIoServerNamespace('/'))
 
         self.wsgi_app = socketio.WSGIApp(self)
