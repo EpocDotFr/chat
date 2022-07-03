@@ -5,16 +5,18 @@ import socketio
 
 
 class Application(tk.Tk):
-    def __init__(self, nickname, url, *args, **kvargs):
+    def __init__(self, nickname, url, dev=False, *args, **kvargs):
         super(Application, self).__init__(*args, **kvargs)
 
         self.nickname = nickname
         self.url = url
+        self.dev = dev
 
         self.title('Chat - {}@{}'.format(self.nickname, self.url))
         self.geometry('800x600')
 
         self.build_gui()
+        self.init_events()
         self.init_socketio()
 
     def build_gui(self):
@@ -52,10 +54,21 @@ class Application(tk.Tk):
 
         self.message_input.pack(fill=tk.BOTH, expand=True)
 
-    def init_socketio(self):
-        self.sio = socketio.Client(logger=True)
+    def init_events(self):
+        def on_closing():
+            self.sio.disconnect()
 
-        self.sio.connect(self.url, transports=('websocket',))
+            self.destroy()
+
+        self.protocol('WM_DELETE_WINDOW', on_closing)
+
+    def init_socketio(self):
+        self.sio = socketio.Client(logger=self.dev)
+
+        try:
+            self.sio.connect(self.url, transports=('websocket',))
+        except KeyboardInterrupt:
+            print('Shutting down client...')
 
         @self.sio.event
         def connect():
