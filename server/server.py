@@ -1,12 +1,24 @@
+from urllib.parse import parse_qs
 import socketio
 
 
 class SocketIoServerNamespace(socketio.Namespace):
     def on_connect(self, sid, environ):
-        print('Connected')
+        query_string = parse_qs(environ.get('QUERY_STRING', ''))
+
+        nickname = query_string.get('nickname', [''])[0]
+
+        self.save_session(sid, {'nickname': nickname})
+
+        self.emit('joined', nickname)
 
     def on_disconnect(self, sid):
-        print('Disconnected')
+        nickname = self.get_session(sid).get('nickname', '')
+
+        self.emit('leaved', nickname)
+
+    def on_out_message(self, sid, nickname, message):
+        self.emit('in_message', (nickname, message))
 
 
 class SocketIoServer(socketio.Server):

@@ -19,6 +19,15 @@ class SocketIoClientNamespace(socketio.ClientNamespace):
     def on_disconnect(self):
         self.application.add_system_private_message('Déconnecté')
 
+    def on_in_message(self, nickname, message):
+        self.application.add_chat_message(nickname, message)
+
+    def on_joined(self, nickname):
+        self.application.add_system_public_message('{} a rejoint le chat'.format(nickname))
+
+    def on_leaved(self, nickname):
+        self.application.add_system_public_message('{} a quitté le chat'.format(nickname))
+
 
 class Application(tk.Tk):
     def __init__(self, nickname, url, dev=False, *args, **kvargs):
@@ -74,9 +83,6 @@ class Application(tk.Tk):
         self.messages.tag_configure('system-public', foreground='dark green', font=self.system_message_public_font)
         self.messages.tag_configure('system-private', foreground='grey', font=self.system_message_private_font)
 
-        self.add_system_public_message('Epoc a rejoint le chat')
-        self.add_chat_message('Epoc', 'yo')
-
         self.messages.pack(fill=tk.BOTH, expand=True)
 
         # New message input
@@ -93,6 +99,14 @@ class Application(tk.Tk):
 
         self.protocol('WM_DELETE_WINDOW', on_closing)
 
+        # Send message
+        def send_message(event):
+            self.sio.emit('out_message', (self.nickname, self.message_input.get()))
+
+            self.message_input.delete(0, tk.END)
+
+        self.message_input.bind('<Return>', send_message)
+
     def init_socketio(self):
         self.sio = socketio.Client(logger=self.dev)
         self.sio.register_namespace(SocketIoClientNamespace(self, '/'))
@@ -100,7 +114,7 @@ class Application(tk.Tk):
         try:
             self.add_system_private_message('Connexion à {}...'.format(self.url))
 
-            self.sio.connect(self.url, transports=('websocket',))
+            self.sio.connect(self.url + '?nickname=' + self.nickname, transports=('websocket',))
         except KeyboardInterrupt:
             print('Shutting down client...')
         except Exception as e:
