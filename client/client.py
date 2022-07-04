@@ -1,3 +1,5 @@
+from urllib.parse import urlencode
+from colorhash import ColorHash
 import tkinter.font as tk_font
 from datetime import datetime
 from tkinter import ttk
@@ -20,8 +22,8 @@ class SocketIoClientNamespace(socketio.ClientNamespace):
     def on_disconnect(self):
         self.application.add_system_private_message('Déconnecté')
 
-    def on_in_message(self, nickname, message, time):
-        self.application.add_chat_message(nickname, message, time)
+    def on_in_message(self, sender_sid, nickname, color, message, time):
+        self.application.add_chat_message(sender_sid, nickname, color, message, time)
 
     def on_joined(self, nickname):
         self.application.add_system_public_message('{} a rejoint le chat'.format(nickname))
@@ -38,19 +40,28 @@ class Application(tk.Tk):
         self.url = url
         self.dev = dev
 
+        self.color = ColorHash(self.nickname).hex
+        self.nicknames_color = []
+
         self.title('Chat - {}@{}'.format(self.nickname, self.url))
+
         self.geometry('800x600')
 
         self.build_gui()
         self.init_events()
         self.init_socketio()
 
-    def add_chat_message(self, nickname, message, time):
+    def add_chat_message(self, sender_sid, nickname, color, message, time):
+        if sender_sid not in self.nicknames_color:
+            self.messages.tag_configure('nickname-' + sender_sid, foreground=color)
+
+            self.nicknames_color.append(sender_sid)
+
         self.messages.configure(state=tk.NORMAL)
 
         self.messages.insert(tk.END, '[{}]'.format(time), ('time',))
         self.messages.insert(tk.END, ' ')
-        self.messages.insert(tk.END, '<{}>'.format(nickname), ('nickname',))
+        self.messages.insert(tk.END, '<{}>'.format(nickname), ('nickname', 'nickname-' + sender_sid))
         self.messages.insert(tk.END, ' ' + message + '\n')
 
         self.messages.configure(state=tk.DISABLED)
@@ -91,26 +102,24 @@ class Application(tk.Tk):
         self.message_input.pack(fill=tk.BOTH, expand=True)
         self.message_input.focus()
 
+    def on_closing(self):
+        self.sio.disconnect()
+
+        self.destroy()
+
+    def send_message(self, event):
+        self.sio.emit('out_message', (
+            self.nickname,
+            self.color,
+            self.message_input.get(),
+            datetime.now().strftime('%H:%M')
+        ))
+
+        self.message_input.delete(0, tk.END)
+
     def init_events(self):
-        # Program exit
-        def on_closing():
-            self.sio.disconnect()
-
-            self.destroy()
-
-        self.protocol('WM_DELETE_WINDOW', on_closing)
-
-        # Send message
-        def send_message(event):
-            self.sio.emit('out_message', (
-                self.nickname,
-                self.message_input.get(),
-                datetime.now().strftime('%H:%M')
-            ))
-
-            self.message_input.delete(0, tk.END)
-
-        self.message_input.bind('<Return>', send_message)
+        self.protocol('WM_DELETE_WINDOW', self.on_closing)
+        self.message_input.bind('<Return>', self.send_message)
 
     def init_socketio(self):
         self.sio = socketio.Client(logger=self.dev, ssl_verify=not self.dev)
@@ -119,7 +128,11 @@ class Application(tk.Tk):
         try:
             self.add_system_private_message('Connexion à {}...'.format(self.url))
 
-            self.sio.connect(self.url + '?nickname=' + self.nickname, transports=('websocket',))
+            params = {
+                'nickname': self.nickname,
+            }
+
+            self.sio.connect(self.url + '?' + urlencode(params), transports=('websocket',))
         except KeyboardInterrupt:
             print('Shutting down client...')
         except Exception as e:
