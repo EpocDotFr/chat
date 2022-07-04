@@ -59,10 +59,10 @@ class Application(tk.Tk):
 
         self.messages.configure(state=tk.NORMAL)
 
-        self.messages.insert(tk.END, '[{}]'.format(time), ('time',))
+        self.messages.insert(tk.END, '{}'.format(time), ('time',))
         self.messages.insert(tk.END, ' ')
-        self.messages.insert(tk.END, '<{}>'.format(nickname), ('nickname', 'nickname-' + sender_sid))
-        self.messages.insert(tk.END, ' ' + message + '\n')
+        self.messages.insert(tk.END, '{}'.format(nickname), ('nickname', 'nickname-' + sender_sid))
+        self.messages.insert(tk.END, ': ' + message + '\n')
 
         self.messages.configure(state=tk.DISABLED)
 
