@@ -105,7 +105,7 @@ class Application(tk.Tk):
         self.message_input.bind('<Return>', send_message)
 
     def init_socketio(self):
-        self.sio = socketio.Client(logger=self.dev)
+        self.sio = socketio.Client(logger=self.dev, ssl_verify=not self.dev)
         self.sio.register_namespace(SocketIoClientNamespace(self, '/'))
 
         try:
