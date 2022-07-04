@@ -3,7 +3,7 @@ import socketio
 
 
 class SocketIoServerNamespace(socketio.Namespace):
-    def on_connect(self, sid, environ):
+    def on_connect(self, sid, environ, auth):
         query_string = parse_qs(environ.get('QUERY_STRING', ''))
 
         nickname = query_string.get('nickname', [''])[0]

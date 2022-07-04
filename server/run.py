@@ -7,6 +7,8 @@ def run():
     arg_parser.add_argument('--host', default='localhost')
     arg_parser.add_argument('--port', type=int, default=5000)
     arg_parser.add_argument('--dev', action='store_true')
+    arg_parser.add_argument('--keyfile', default=None, nargs='?')
+    arg_parser.add_argument('--certfile', default=None, nargs='?')
 
     args = arg_parser.parse_args()
 
@@ -18,7 +20,23 @@ def run():
         from geventwebsocket.handler import WebSocketHandler
         from gevent.pywsgi import WSGIServer
 
-        wsgi = WSGIServer((args.host, args.port), server.wsgi_app, handler_class=WebSocketHandler)
+        wsgi_args = (
+            (args.host, args.port),
+            server.wsgi_app
+        )
+
+        wsgi_kvargs = {
+            'handler_class': WebSocketHandler
+        }
+
+        if args.keyfile and args.certfile:
+            wsgi_kvargs['keyfile'] = args.keyfile
+            wsgi_kvargs['certfile'] = args.certfile
+
+        wsgi = WSGIServer(
+            *wsgi_args,
+            **wsgi_kvargs
+        )
 
         try:
             wsgi.serve_forever()

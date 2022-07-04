@@ -13,7 +13,7 @@ class SocketIoClientNamespace(socketio.ClientNamespace):
     def on_connect(self):
         self.application.add_system_private_message('Connecté')
 
-    def on_connect_error(self):
+    def on_connect_error(self, data):
         self.application.add_system_private_message('Échec de la connexion')
 
     def on_disconnect(self):
