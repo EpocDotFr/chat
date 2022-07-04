@@ -17,8 +17,8 @@ class SocketIoServerNamespace(socketio.Namespace):
 
         self.emit('leaved', nickname)
 
-    def on_out_message(self, sid, nickname, message):
-        self.emit('in_message', (nickname, message))
+    def on_out_message(self, sid, nickname, message, time):
+        self.emit('in_message', (nickname, message, time))
 
 
 class SocketIoServer(socketio.Server):

@@ -1,4 +1,5 @@
 import tkinter.font as tk_font
+from datetime import datetime
 from tkinter import ttk
 import tkinter as tk
 import socketio
@@ -19,8 +20,8 @@ class SocketIoClientNamespace(socketio.ClientNamespace):
     def on_disconnect(self):
         self.application.add_system_private_message('Déconnecté')
 
-    def on_in_message(self, nickname, message):
-        self.application.add_chat_message(nickname, message)
+    def on_in_message(self, nickname, message, time):
+        self.application.add_chat_message(nickname, message, time)
 
     def on_joined(self, nickname):
         self.application.add_system_public_message('{} a rejoint le chat'.format(nickname))
@@ -44,9 +45,11 @@ class Application(tk.Tk):
         self.init_events()
         self.init_socketio()
 
-    def add_chat_message(self, nickname, message):
+    def add_chat_message(self, nickname, message, time):
         self.messages.configure(state=tk.NORMAL)
 
+        self.messages.insert(tk.END, '[{}]'.format(time), ('time',))
+        self.messages.insert(tk.END, ' ')
         self.messages.insert(tk.END, '<{}>'.format(nickname), ('nickname',))
         self.messages.insert(tk.END, ' ' + message + '\n')
 
@@ -76,6 +79,7 @@ class Application(tk.Tk):
         self.system_message_font = tk_font.Font(font='TkDefaultFont')
         self.system_message_font.configure(slant='italic')
 
+        self.messages.tag_configure('time', foreground='grey')
         self.messages.tag_configure('nickname', font=self.nickname_font)
         self.messages.tag_configure('system-public', foreground='dark green', font=self.system_message_font)
         self.messages.tag_configure('system-private', foreground='grey', font=self.system_message_font)
@@ -98,7 +102,11 @@ class Application(tk.Tk):
 
         # Send message
         def send_message(event):
-            self.sio.emit('out_message', (self.nickname, self.message_input.get()))
+            self.sio.emit('out_message', (
+                self.nickname,
+                self.message_input.get(),
+                datetime.now().strftime('%H:%M')
+            ))
 
             self.message_input.delete(0, tk.END)
 
