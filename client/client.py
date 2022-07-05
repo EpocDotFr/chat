@@ -115,8 +115,8 @@ class Application(tk.Tk):
         self.color = ColorHash(self.nickname).hex
 
         self.title('Chat - {}@{}'.format(self.nickname, self.url))
-
         self.geometry('800x600')
+        self.iconphoto(False, tk.PhotoImage(file='resources/images/icon.png'))
 
         self.protocol('WM_DELETE_WINDOW', self.on_closing)
 
