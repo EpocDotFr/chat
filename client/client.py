@@ -124,6 +124,7 @@ class MessageInput:
         self.entry_widget.focus()
 
         self.entry_widget.bind('<Return>', self.send_message)
+        self.entry_widget.bind('<KP_Enter>', self.send_message)
 
     def send_message(self, event):
         self.application.sio.emit('out_message', (
