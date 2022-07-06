@@ -32,6 +32,38 @@ class SocketIoClientNamespace(socketio.ClientNamespace):
         self.application.messages_list.add_system_public_message('{} a quitté le chat'.format(nickname))
 
 
+class UsersList:
+    def __init__(self, application):
+        self.application = application
+
+        self.users = {}
+        self.nicknames = []
+        self.nicknames_var = tk.StringVar(value=self.nicknames)
+
+        self.listbox_widget = tk.Listbox(self.application, listvariable=self.nicknames_var, state=tk.DISABLED)
+
+        self.listbox_widget.pack(fill=tk.Y, expand=True, side=tk.RIGHT, padx=(0, 5), pady=5)
+
+    def set(self, sid, **kvargs):
+        self.users[sid] = kvargs
+
+        self.update_listbox()
+
+    def get(self, sid):
+        return self.users.get(sid)
+
+    def remove(self, sid):
+        self.users.pop(sid)
+
+        self.update_listbox()
+
+    def update_listbox(self):
+        self.nicknames = [user['nickname'] for user in self.users.values()]
+        self.nicknames.sort()
+
+        self.nicknames_var.set(self.nicknames)
+
+
 class MessagesList:
     def __init__(self, application):
         self.application = application
@@ -120,6 +152,7 @@ class Application(tk.Tk):
 
         self.protocol('WM_DELETE_WINDOW', self.on_closing)
 
+        self.users_list = UsersList(self)
         self.messages_list = MessagesList(self)
         self.message_input = MessageInput(self)
 
