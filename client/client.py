@@ -22,13 +22,22 @@ class SocketIoClientNamespace(socketio.ClientNamespace):
     def on_disconnect(self):
         self.application.messages_list.add_system_private_message('Déconnecté')
 
-    def on_in_message(self, sender_sid, nickname, color, message, time):
-        self.application.messages_list.add_chat_message(sender_sid, nickname, color, message, time)
+    def on_in_message(self, sender_sid, message, time):
+        self.application.messages_list.add_chat_message(sender_sid, message, time)
 
-    def on_joined(self, nickname):
+    def on_joined(self, sid, nickname, color):
+        self.application.users_list.set(sid, nickname=nickname, color=color)
+        self.application.users_list.update_widget()
+
         self.application.messages_list.add_system_public_message('{} a rejoint le chat'.format(nickname))
 
-    def on_leaved(self, nickname):
+    def on_leaved(self, sid):
+        user = self.application.users_list.get(sid)
+        nickname = user.get('nickname')
+
+        self.application.users_list.remove(sid)
+        self.application.users_list.update_widget()
+
         self.application.messages_list.add_system_public_message('{} a quitté le chat'.format(nickname))
 
 
@@ -87,9 +96,11 @@ class MessagesList:
 
         self.nicknames_color = []
 
-    def add_chat_message(self, sender_sid, nickname, color, message, time):
+    def add_chat_message(self, sender_sid, message, time):
+        user = self.application.users_list.get(sender_sid)
+
         if sender_sid not in self.nicknames_color:
-            self.text_widget.tag_configure('nickname-' + sender_sid, foreground=color)
+            self.text_widget.tag_configure('nickname-' + sender_sid, foreground=user.get('color'))
 
             self.nicknames_color.append(sender_sid)
 
@@ -97,7 +108,7 @@ class MessagesList:
 
         self.text_widget.insert(tk.END, '{}'.format(time), ('time',))
         self.text_widget.insert(tk.END, ' ')
-        self.text_widget.insert(tk.END, '{}'.format(nickname), ('nickname', 'nickname-' + sender_sid))
+        self.text_widget.insert(tk.END, '{}'.format(user.get('nickname')), ('nickname', 'nickname-' + sender_sid))
         self.text_widget.insert(tk.END, ': ' + message + '\n')
 
         self.text_widget.configure(state=tk.DISABLED)
@@ -130,8 +141,6 @@ class MessageInput:
 
     def send_message(self, event):
         self.application.sio.emit('out_message', (
-            self.application.nickname,
-            self.application.color,
             self.entry_widget.get(),
             datetime.now().strftime('%H:%M')
         ))
@@ -174,6 +183,7 @@ class Application(tk.Tk):
 
             params = {
                 'nickname': self.nickname,
+                'color': self.color,
             }
 
             self.sio.connect(self.url + '?' + urlencode(params), transports=('websocket',))

@@ -7,18 +7,15 @@ class SocketIoServerNamespace(socketio.Namespace):
         query_string = parse_qs(environ.get('QUERY_STRING', ''))
 
         nickname = query_string.get('nickname', [''])[0]
+        color = query_string.get('color', [''])[0]
 
-        self.save_session(sid, {'nickname': nickname})
-
-        self.emit('joined', nickname)
+        self.emit('joined', (sid, nickname, color))
 
     def on_disconnect(self, sid):
-        nickname = self.get_session(sid).get('nickname', '')
+        self.emit('leaved', sid)
 
-        self.emit('leaved', nickname)
-
-    def on_out_message(self, sid, nickname, color, message, time):
-        self.emit('in_message', (sid, nickname, color, message, time))
+    def on_out_message(self, sid, message, time):
+        self.emit('in_message', (sid, message, time))
 
 
 class SocketIoServer(socketio.Server):
