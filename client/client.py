@@ -22,12 +22,21 @@ class SocketIoClientNamespace(socketio.ClientNamespace):
     def on_disconnect(self):
         self.application.messages_list.add_system_private_message('Déconnecté')
 
+    def on_users(self, users):
+        self.application.users_list.clear()
+
+        for user in users:
+            self.application.users_list.set(user.get('sid'), nickname=user.get('nickname'), color=user.get('color'))
+
+        self.application.users_list.update_widget()
+
     def on_in_message(self, sender_sid, message, time):
         self.application.messages_list.add_chat_message(sender_sid, message, time)
 
     def on_joined(self, sid, nickname, color):
-        self.application.users_list.set(sid, nickname=nickname, color=color)
-        self.application.users_list.update_widget()
+        if sid != self.application.sio.sid: # FIXME They're not identical for unknown reason
+            self.application.users_list.set(sid, nickname=nickname, color=color)
+            self.application.users_list.update_widget()
 
         self.application.messages_list.add_system_public_message('{} a rejoint le chat'.format(nickname))
 
@@ -58,6 +67,9 @@ class UsersList:
 
     def remove(self, sid):
         self.users.pop(sid)
+
+    def clear(self):
+        self.users = {}
 
     def clear_widget(self):
         self.listbox_widget.delete(0, tk.END)
