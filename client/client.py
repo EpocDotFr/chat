@@ -49,7 +49,7 @@ class MessagesList:
         self.text_widget.tag_configure('system-public', foreground='dark green', font=self.system_message_font)
         self.text_widget.tag_configure('system-private', foreground='grey', font=self.system_message_font)
 
-        self.text_widget.pack(fill=tk.BOTH, expand=True)
+        self.text_widget.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
 
         self.nicknames_color = []
 
@@ -88,7 +88,7 @@ class MessageInput:
         self.application = application
 
         self.entry_widget = ttk.Entry(self.application)
-        self.entry_widget.pack(fill=tk.BOTH, expand=True)
+        self.entry_widget.pack(fill=tk.X, padx=5, pady=(0, 5))
         self.entry_widget.focus()
 
         self.entry_widget.bind('<Return>', self.send_message)
