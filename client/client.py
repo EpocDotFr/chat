@@ -37,17 +37,12 @@ class UsersList:
         self.application = application
 
         self.users = {}
-        self.nicknames = []
-        self.nicknames_var = tk.StringVar(value=self.nicknames)
 
-        self.listbox_widget = tk.Listbox(self.application, listvariable=self.nicknames_var, state=tk.DISABLED)
-
+        self.listbox_widget = tk.Listbox(self.application)
         self.listbox_widget.pack(fill=tk.Y, expand=True, side=tk.RIGHT, padx=(0, 5), pady=5)
 
     def set(self, sid, **kvargs):
         self.users[sid] = kvargs
-
-        self.update_listbox()
 
     def get(self, sid):
         return self.users.get(sid)
@@ -55,13 +50,20 @@ class UsersList:
     def remove(self, sid):
         self.users.pop(sid)
 
-        self.update_listbox()
+    def clear_widget(self):
+        self.listbox_widget.delete(0, tk.END)
 
-    def update_listbox(self):
-        self.nicknames = [user['nickname'] for user in self.users.values()]
-        self.nicknames.sort()
+    def update_widget(self):
+        self.clear_widget()
 
-        self.nicknames_var.set(self.nicknames)
+        self.sorted_users = [(sid, user.get('nickname')) for sid, user in self.users.items()]
+        self.sorted_users.sort(key=lambda sorted_user: sorted_user[1])
+
+        for sorted_user in self.sorted_users:
+            user = self.get(sorted_user[0])
+
+            self.listbox_widget.insert(tk.END, user.get('nickname'))
+            self.listbox_widget.itemconfig(tk.END, foreground=user.get('color'))
 
 
 class MessagesList:
