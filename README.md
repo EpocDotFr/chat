@@ -4,7 +4,7 @@ Educational chat client and server using tkinter and Socket.IO.
 
 ## Dev (local) mode
 
-The server is using gevent and gevent-websocket for the websocket transport.
+The server is using gevent and gevent-websocket for Socket.IO's websocket transport.
 
 ### Install
 
@@ -75,4 +75,26 @@ python run.py Nickname --dev --url https://localhost:5000
 
 ## Production mode
 
-The server is using gevent and uwsgi for the websocket transport.
+The server is using gevent and the built-in uwsgi's websocket capabilities for Socket.IO's websocket transport.
+
+### Install
+
+Server:
+
+```
+pip install requirements-prod.txt
+```
+
+Client:
+
+```
+pip install requirements.txt
+```
+
+### Without SSL
+
+TODO
+
+### With SSL
+
+TODO
