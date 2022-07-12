@@ -25,7 +25,8 @@ pip install requirements.txt
 Run the server:
 
 ```
-python run.py --dev
+export DEV=true
+python run.py
 ```
 Run the client:
 
@@ -38,7 +39,10 @@ python run.py Nickname --dev
 Run the server:
 
 ```
-python run.py --dev --host local.dev --port 8080
+export DEV=true
+export HOST=local.dev
+export PORT=8080
+python run.py
 ```
 
 Run the client:
@@ -64,7 +68,10 @@ openssl req -new -x509 -key private.pem -out cacert.pem
 Run the server:
 
 ```
-python run.py --dev --keyfile private.pem --certfile cacert.pem
+export DEV=true
+export KEYFILE=private.pem
+export CERTFILE=cacert.pem
+python run.py
 ```
 
 Run the client:

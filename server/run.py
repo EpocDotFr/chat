@@ -1,27 +1,29 @@
 from server import SocketIoServer
-import argparse
+from environs import Env
 
 
 def run():
-    arg_parser = argparse.ArgumentParser()
-    arg_parser.add_argument('--host', default='localhost')
-    arg_parser.add_argument('--port', type=int, default=5000)
-    arg_parser.add_argument('--dev', action='store_true')
-    arg_parser.add_argument('--keyfile', default=None, nargs='?')
-    arg_parser.add_argument('--certfile', default=None, nargs='?')
+    env = Env()
+    env.read_env()
 
-    args = arg_parser.parse_args()
+    config = {
+        'host': env.str('HOST', default='localhost'),
+        'port': env.int('PORT', default=5000),
+        'dev': env.bool('DEV', default=False),
+        'keyfile': env.str('KEYFILE', default=None),
+        'certfile': env.str('CERTFILE', default=None),
+    }
 
     print('Initializing server...')
 
-    server = SocketIoServer(logger=args.dev)
+    server = SocketIoServer(logger=config.get('dev'))
 
-    if args.dev:
+    if config.get('dev'):
         from geventwebsocket.handler import WebSocketHandler
         from gevent.pywsgi import WSGIServer
 
         wsgi_args = (
-            (args.host, args.port),
+            (config.get('host'), config.get('port')),
             server.wsgi_app
         )
 
@@ -29,9 +31,9 @@ def run():
             'handler_class': WebSocketHandler
         }
 
-        if args.keyfile and args.certfile:
-            wsgi_kvargs['keyfile'] = args.keyfile
-            wsgi_kvargs['certfile'] = args.certfile
+        if config.get('keyfile') and config.get('certfile'):
+            wsgi_kvargs['keyfile'] = config.get('keyfile')
+            wsgi_kvargs['certfile'] = config.get('certfile')
 
         wsgi = WSGIServer(
             *wsgi_args,
@@ -43,7 +45,7 @@ def run():
         except KeyboardInterrupt:
             print('Shutting down server...')
     else:
-        raise NotImplementedError()
+        application = server.wsgi_app
 
 
 if __name__ == '__main__':
