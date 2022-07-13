@@ -1,12 +1,10 @@
+from geventwebsocket.handler import WebSocketHandler
+from gevent.pywsgi import WSGIServer
 from server import SocketIoServer
 from environs import Env
 
-application = None
-
 
 def run():
-    global application
-
     env = Env()
     env.read_env()
 
@@ -22,34 +20,28 @@ def run():
 
     server = SocketIoServer(logger=config.get('dev'))
 
-    if config.get('dev'):
-        from geventwebsocket.handler import WebSocketHandler
-        from gevent.pywsgi import WSGIServer
+    wsgi_args = (
+        (config.get('host'), config.get('port')),
+        server.wsgi_app
+    )
 
-        wsgi_args = (
-            (config.get('host'), config.get('port')),
-            server.wsgi_app
-        )
+    wsgi_kvargs = {
+        'handler_class': WebSocketHandler
+    }
 
-        wsgi_kvargs = {
-            'handler_class': WebSocketHandler
-        }
+    if config.get('keyfile') and config.get('certfile'):
+        wsgi_kvargs['keyfile'] = config.get('keyfile')
+        wsgi_kvargs['certfile'] = config.get('certfile')
 
-        if config.get('keyfile') and config.get('certfile'):
-            wsgi_kvargs['keyfile'] = config.get('keyfile')
-            wsgi_kvargs['certfile'] = config.get('certfile')
+    wsgi = WSGIServer(
+        *wsgi_args,
+        **wsgi_kvargs
+    )
 
-        wsgi = WSGIServer(
-            *wsgi_args,
-            **wsgi_kvargs
-        )
-
-        try:
-            wsgi.serve_forever()
-        except KeyboardInterrupt:
-            print('Shutting down server...')
-    else:
-        application = server.wsgi_app
+    try:
+        wsgi.serve_forever()
+    except KeyboardInterrupt:
+        print('Shutting down server...')
 
 
 if __name__ == '__main__':
