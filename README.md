@@ -31,7 +31,9 @@ python run.py
 Run the client:
 
 ```
-python run.py Nickname --dev
+export DEV=true
+export NICKNAME=Nickname
+python run.py
 ```
 
 ### Running using a custom URL
@@ -48,7 +50,10 @@ python run.py
 Run the client:
 
 ```
-python run.py Nickname --dev --url http://local.dev:8080
+export DEV=true
+export NICKNAME=Nickname
+export URL=http://local.dev:8080
+python run.py
 ```
 
 ### Running using SSL and defaults
@@ -77,7 +82,10 @@ python run.py
 Run the client:
 
 ```
-python run.py Nickname --dev --url https://localhost:5000
+export DEV=true
+export NICKNAME=Nickname
+export URL=https://localhost:5000
+python run.py
 ```
 
 ## Production mode

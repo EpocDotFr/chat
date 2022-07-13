@@ -1,18 +1,20 @@
 from client import Application
-import argparse
+from environs import Env
 
 
 def run():
-    arg_parser = argparse.ArgumentParser()
-    arg_parser.add_argument('nickname')
-    arg_parser.add_argument('--url', default='http://localhost:5000')
-    arg_parser.add_argument('--dev', action='store_true')
+    env = Env()
+    env.read_env()
 
-    args = arg_parser.parse_args()
+    config = {
+        'nickname': env.str('NICKNAME'),
+        'url': env.str('URL', default='http://localhost:5000'),
+        'dev': env.bool('DEV', default=False),
+    }
 
     print('Initializing client...')
 
-    Application(args.nickname, args.url, args.dev).mainloop()
+    Application(config.get('nickname'), config.get('url'), config.get('dev')).mainloop()
 
 
 if __name__ == '__main__':
