@@ -1,8 +1,12 @@
 from server import SocketIoServer
 from environs import Env
 
+application = None
+
 
 def run():
+    global application
+
     env = Env()
     env.read_env()
 
