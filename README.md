@@ -106,10 +106,23 @@ Client:
 pip install requirements.txt
 ```
 
-### Without SSL
+### Run the server
 
-TODO
+uWSGI config:
 
-### With SSL
+```
+chdir = server
+pyhome = server/venv
+wsgi-file = server/wsgi.py
+gevent = 1000
+http-websockets = true
+master = true
+```
 
-TODO
+### Run the client
+
+```
+export NICKNAME=Nickname
+export URL=https://chat.example.com
+python run.py
+```
