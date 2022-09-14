@@ -38,7 +38,7 @@ class SocketIoClientNamespace(socketio.ClientNamespace):
             self.application.users_list.set(sid, nickname=nickname, color=color)
             self.application.users_list.update_widget()
 
-        self.application.messages_list.add_system_public_message('{} a rejoint le chat'.format(nickname))
+        self.application.messages_list.add_system_public_message(f'{nickname} a rejoint le chat')
 
     def on_leaved(self, sid):
         user = self.application.users_list.get(sid)
@@ -47,7 +47,7 @@ class SocketIoClientNamespace(socketio.ClientNamespace):
         self.application.users_list.remove(sid)
         self.application.users_list.update_widget()
 
-        self.application.messages_list.add_system_public_message('{} a quitté le chat'.format(nickname))
+        self.application.messages_list.add_system_public_message(f'{nickname} a quitté le chat')
 
 
 class UsersList:
@@ -118,9 +118,9 @@ class MessagesList:
 
         self.text_widget.configure(state=tk.NORMAL)
 
-        self.text_widget.insert(tk.END, '{}'.format(time), ('time',))
+        self.text_widget.insert(tk.END, time, ('time',))
         self.text_widget.insert(tk.END, ' ')
-        self.text_widget.insert(tk.END, '{}'.format(user.get('nickname')), ('nickname', 'nickname-' + sender_sid))
+        self.text_widget.insert(tk.END, user.get('nickname'), ('nickname', 'nickname-' + sender_sid))
         self.text_widget.insert(tk.END, ': ' + message + '\n')
 
         self.text_widget.configure(state=tk.DISABLED)
@@ -170,7 +170,7 @@ class Application(tk.Tk):
 
         self.color = ColorHash(self.nickname).hex
 
-        self.title('Chat - {}@{}'.format(self.nickname, self.url))
+        self.title(f'Chat - {self.nickname}@{self.url}')
         self.geometry('800x600')
         self.iconphoto(False, tk.PhotoImage(file='resources/images/icon.png'))
 
@@ -191,7 +191,7 @@ class Application(tk.Tk):
         self.sio.register_namespace(SocketIoClientNamespace(self, '/'))
 
         try:
-            self.messages_list.add_system_private_message('Connexion à {}...'.format(self.url))
+            self.messages_list.add_system_private_message(f'Connexion à {self.url}...')
 
             params = {
                 'nickname': self.nickname,
